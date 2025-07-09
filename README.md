@@ -20,6 +20,7 @@ Working with Gemma-2 (2B) is possible with relatively limited GPU resources; Col
 Currently, intervening on models with respect to the transcoder features you discover in your graphs is only possible when using `circuit-tracer` in a script or notebook, not on Neuronpedia.
 
 ## Installation
+Run `apt update && apt install -y pkg-config cmake build-essential` to install the required system dependencies.
 To install this library, clone it and run the command  `pip install .` in its directory.
 
 ## Demos
