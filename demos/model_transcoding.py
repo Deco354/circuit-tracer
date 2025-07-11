@@ -38,6 +38,51 @@ model.add_module("transcoders", transcoders_module)
 # model.skip_transcoder = transcoders[-1].W_skip is not None
 # model.scan = scan
 
+
+# ReplacementMLP and ReplacementUnembed are used to add in extra hooks to the model
+# This is done by subclassing the original MLP and Unembed layers and adding in the hooks
+# The hooks are used to cache the activations and compute the skip connections
+class ReplacementMLP(nn.Module):
+    """Wrapper for a TransformerLens MLP layer that adds in extra hooks"""
+
+    def __init__(self, old_mlp: nn.Module):
+        super().__init__()
+        self.old_mlp = old_mlp
+        self.hook_in = HookPoint()
+        self.hook_out = HookPoint()
+
+    def forward(self, x):
+        x = self.hook_in(x)
+        mlp_out = self.old_mlp(x)
+        return self.hook_out(mlp_out)
+
+
+class ReplacementUnembed(nn.Module):
+    """Wrapper for a TransformerLens Unembed layer that adds in extra hooks"""
+
+    def __init__(self, old_unembed: nn.Module):
+        super().__init__()
+        self.old_unembed = old_unembed
+        self.hook_pre = HookPoint()
+        self.hook_post = HookPoint()
+
+    @property
+    def W_U(self):
+        return self.old_unembed.W_U
+
+    @property
+    def b_U(self):
+        return self.old_unembed.b_U
+
+    def forward(self, x):
+        x = self.hook_pre(x)
+        x = self.old_unembed(x)
+        return self.hook_post(x)
+
+
+def cache_activations(acts, hook):
+    cache["acts"] = acts
+
 # Add skip connections
 for layer, transcoder in enumerate(transcoders.values()):
     transformer_block = model.blocks[layer]
