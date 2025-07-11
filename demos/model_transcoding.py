@@ -22,13 +22,15 @@ transcoders: OrderedDict[int, SingleLayerTranscoder] = transcoder_settings.trans
 feature_input_hook: str = transcoder_settings.feature_input_hook
 feature_output_hook: str = transcoder_settings.feature_output_hook
 scan: str | list[str] = transcoder_settings.scan
+cache = {}
 
+print("Transcoders:")
 print(transcoders.keys())
-type(transcoders[0])
 for transcoder in transcoders.values():
     transcoder.to(device)
     
 transcoders_module = nn.ModuleList([transcoders[i] for i in range(model.cfg.n_layers)])
+print("Transcoders module:")
 print(transcoders_module)
 model.add_module("transcoders", transcoders_module)
 # model.d_transcoder = transcoders[-1].d_transcoder # This is part of the subclass!
@@ -86,9 +88,19 @@ def cache_activations(acts, hook):
 # Add skip connections
 for layer, transcoder in enumerate(transcoders.values()):
     transformer_block = model.blocks[layer]
-    cache = {}
     mlp_block = getattr(transformer_block, "mlp")
+    
+    input_hookpoint: HookPoint = getattr(mlp_block, "hook_in")
+    input_hookpoint.add_hook(cache_activations, is_permanent=True)
+    
     output_hookpoint: HookPoint = getattr(mlp_block, "hook_out")
+    output_hookpoint.add_hook(cache_activations, is_permanent=True)
+    
+    # Add skip connection
+    if transcoder.W_skip is not None:
+        skip = transcoder.compute_skip(cache["acts"])
+        mlp_block.add_hook(skip, is_permanent=True)
+        
     # hook_string.add_hook(cache_activations, is_permanent=True)
     # print(hook_string)
     # hook_out_grad = getattr(mlp_block, f"{hook_string}_grad")
