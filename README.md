@@ -32,6 +32,11 @@ apt update && apt install -y pkg-config cmake build-essential
 pip install .
 ```
 
+### Troubleshooting
+* If using VSCode or Cursor you will also need to set the VSCode notebook environment to `circuit-tracer` through their interface.
+* If you get a kernal crash switch to a different GPU, gemma models appear to have issues on running on A100 pcie cards
+* The demos won't run on Apple M series (mps) GPUs.
+
 ## Demos
 We include some demos showing how to use our library in the `demos` folder. The main demo is [`demos/circuit_tracing_tutorial.ipynb`](https://github.com/safety-research/circuit-tracer/blob/main/demos/circuit_tracing_tutorial.ipynb), which replicates two of the findings from [this paper](https://transformer-circuits.pub/2025/attribution-graphs/biology.html) using Gemma 2 (2B). All demos except for the Llama demo can be run on Colab.
 
