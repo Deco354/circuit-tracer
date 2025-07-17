@@ -20,7 +20,17 @@ Working with Gemma-2 (2B) is possible with relatively limited GPU resources; Col
 Currently, intervening on models with respect to the transcoder features you discover in your graphs is only possible when using `circuit-tracer` in a script or notebook, not on Neuronpedia.
 
 ## Installation
-To install this library, clone it and run the command  `pip install .` in its directory.
+Run the following command.
+
+```bash
+git clone https://github.com/safety-research/circuit-tracer.git
+cd circuit-tracer
+conda deactivate
+conda create --name circuit-tracer python=3.11
+conda activate circuit-tracer
+apt update && apt install -y pkg-config cmake build-essential
+pip install .
+```
 
 ## Demos
 We include some demos showing how to use our library in the `demos` folder. The main demo is [`demos/circuit_tracing_tutorial.ipynb`](https://github.com/safety-research/circuit-tracer/blob/main/demos/circuit_tracing_tutorial.ipynb), which replicates two of the findings from [this paper](https://transformer-circuits.pub/2025/attribution-graphs/biology.html) using Gemma 2 (2B). All demos except for the Llama demo can be run on Colab.
